@@ -318,6 +318,33 @@ public class TypeScriptAngularClientCodegenTest {
     }
 
     @Test
+    public void testTaggedUnionCollection() throws Exception {
+        final String specPath = "src/test/resources/3_0/allOf_composition_discriminator_collection.yaml";
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(TypeScriptAngularClientCodegen.TAGGED_UNIONS, "true");
+
+        File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final CodegenConfigurator configurator = new CodegenConfigurator()
+                .setGeneratorName("typescript-angular")
+                .setInputSpec(specPath)
+                .setAdditionalProperties(properties)
+                .setOutputDir(output.getAbsolutePath().replace("\\", "/"));
+
+        final ClientOptInput clientOptInput = configurator.toClientOptInput();
+
+        Generator generator = new DefaultGenerator();
+        generator.opts(clientOptInput).generate();
+
+        TestUtils.assertFileContains(
+                Paths.get(output + "/model/zooInner.ts"),
+                "export type ZooInner = Cat | Dog;"
+        );
+    }
+
+    @Test
     public void testModelNameMappings() throws Exception {
         final String specPath = "src/test/resources/2_0/issue_8289.json";
 
